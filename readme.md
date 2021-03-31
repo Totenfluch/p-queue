@@ -1,6 +1,8 @@
 # p-queue
 
 > Promise queue with concurrency control
+> Same as p-queue but exposes promise: https://github.com/sindresorhus/p-queue/pull/105
+> Loads as a normal module..............
 
 Useful for rate-limiting async (or sync) operations. For example, when interacting with a REST API or when doing CPU/memory intensive tasks.
 
@@ -111,6 +113,8 @@ If `true`, specifies that any [pending](https://developer.mozilla.org/en-US/docs
 #### .add(fn, options?)
 
 Adds a sync or async task to the queue. Always returns a promise.
+
+Note: If your items can potentially throw an exception, you must handle those errors from the returned Promise or they may be reported as an unhandled Promise rejection and potentially cause your process to exit immediately.
 
 ##### fn
 
@@ -226,6 +230,41 @@ queue.add(() => Promise.resolve());
 queue.add(() => Promise.resolve());
 queue.add(() => delay(500));
 ```
+
+#### completed
+
+Emitted when an item completes without error.
+
+```js
+import delay from 'delay';
+import PQueue from 'p-queue';
+
+const queue = new PQueue({concurrency: 2});
+
+queue.on('completed', result => {
+	console.log(result);
+});
+
+queue.add(() => Promise.resolve('hello, world!'));
+```
+
+#### error
+
+Emitted if an item throws an error.
+
+```js
+import delay from 'delay';
+import PQueue from 'p-queue';
+
+const queue = new PQueue({concurrency: 2});
+
+queue.on('error', error => {
+	console.error(error);
+});
+
+queue.add(() => Promise.reject(new Error('error')));
+```
+
 #### idle
 
 Emitted every time the queue becomes empty and all promises have completed; `queue.size === 0 && queue.pending === 0`.
@@ -259,7 +298,7 @@ Emitted every time the add method is called and the number of pending or queued 
 
 #### next
 
-Emitted every time a task is completed and the number of pending or queued tasks is decreased.
+Emitted every time a task is completed and the number of pending or queued tasks is decreased. This is emitted regardless of whether the task completed normally or with an error.
 
 ```js
 const delay = require('delay');
