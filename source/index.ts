@@ -234,45 +234,46 @@ export default class PQueue<QueueType extends Queue<RunFunction, EnqueueOptionsT
 	Adds a sync or async task to the queue. Always returns a promise.
 	*/
 	async add<TaskResultType>(fn: Task<TaskResultType>, options: Partial<EnqueueOptionsType> = {}): Promise<TaskResultType> {
-		return new Promise<TaskResultType>((resolve, reject) => {
-			try {
-				const run = async (): Promise<void> => {
-					this._pendingCount++;
-					this._intervalCount++;
+		const result = new Promise<TaskResultType>((resolve, reject) => {
+			const run = async (): Promise<void> => {
+				this._pendingCount++;
+				this._intervalCount++;
 
-					try {
-						const operation = (this._timeout === undefined && options.timeout === undefined) ? fn() : pTimeout(
-							Promise.resolve(fn()),
-							(options.timeout === undefined ? this._timeout : options.timeout) as number,
-							() => {
-								if (options.throwOnTimeout === undefined ? this._throwOnTimeout : options.throwOnTimeout) {
-									this.emit('error', timeoutError);
-									reject(timeoutError);
-								}
-
+				let isTimeout;
+				let operation;
+				if (this._timeout === undefined && options.timeout === undefined) {
+					operation = fn();
+				} else {
+					const timeoutNum = (options.timeout === undefined ? this._timeout : options.timeout) as number;
+					operation = pTimeout(
+						Promise.resolve(fn()), // function to be called
+						timeoutNum, // timeout in seconds
+						() => {
+							if (options.throwOnTimeout === undefined ? this._throwOnTimeout : options.throwOnTimeout) {
+								isTimeout = true;
 								return undefined;
 							}
-						);
+							return undefined;
+						}
+					);
+				}
+				let result = await operation;
+				if (isTimeout) {
+					this.emit('error', timeoutError);
+					reject(`TimeoutError ${options}`);
+				}
+				resolve(result!);
+				this.emit('completed', result);
 
-						const result = await operation;
-						resolve(result!);
-						this.emit('completed', result);
-					} catch (error: unknown) {
-						reject(error);
-						this.emit('error', error);
-					}
+				this._next();
+			};
 
-					this._next();
-				};
 
-				this._queue.enqueue(run, options, resolve);
-				this._tryToStartAnother();
-				this.emit('add');
-			} catch (e2) {
-				reject(e2);
-				this.emit('error', e2);
-			}
+			this._queue.enqueue(run, options, resolve);
+			this._tryToStartAnother();
+			this.emit('add');
 		});
+		return result;
 	}
 
 	/**
