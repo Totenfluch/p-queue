@@ -1,8 +1,8 @@
 import EventEmitter = require('eventemitter3');
-import {default as pTimeout, TimeoutError} from 'p-timeout';
-import {Queue, RunFunction} from './queue';
+import { default as pTimeout, TimeoutError } from 'p-timeout';
+import { Queue, RunFunction } from './queue';
 import PriorityQueue from './priority-queue';
-import {QueueAddOptions, DefaultAddOptions, Options} from './options';
+import { QueueAddOptions, DefaultAddOptions, Options } from './options';
 
 type ResolveFunction<T = void> = (value?: T | PromiseLike<T>) => void;
 
@@ -11,7 +11,7 @@ type Task<TaskResultType> =
 	| (() => TaskResultType);
 
 // eslint-disable-next-line @typescript-eslint/no-empty-function
-const empty = (): void => {};
+const empty = (): void => { };
 
 const timeoutError = new TimeoutError();
 
@@ -213,7 +213,7 @@ export default class PQueue<QueueType extends Queue<RunFunction, EnqueueOptionsT
 	*/
 	private _processQueue(): void {
 		// eslint-disable-next-line no-empty
-		while (this._tryToStartAnother()) {}
+		while (this._tryToStartAnother()) { }
 	}
 
 	get concurrency(): number {
@@ -235,38 +235,43 @@ export default class PQueue<QueueType extends Queue<RunFunction, EnqueueOptionsT
 	*/
 	async add<TaskResultType>(fn: Task<TaskResultType>, options: Partial<EnqueueOptionsType> = {}): Promise<TaskResultType> {
 		return new Promise<TaskResultType>((resolve, reject) => {
-			const run = async (): Promise<void> => {
-				this._pendingCount++;
-				this._intervalCount++;
+			try {
+				const run = async (): Promise<void> => {
+					this._pendingCount++;
+					this._intervalCount++;
 
-				try {
-					const operation = (this._timeout === undefined && options.timeout === undefined) ? fn() : pTimeout(
-						Promise.resolve(fn()),
-						(options.timeout === undefined ? this._timeout : options.timeout) as number,
-						() => {
-							if (options.throwOnTimeout === undefined ? this._throwOnTimeout : options.throwOnTimeout) {
-								this.emit('error', timeoutError);
-								return timeoutError;
+					try {
+						const operation = (this._timeout === undefined && options.timeout === undefined) ? fn() : pTimeout(
+							Promise.resolve(fn()),
+							(options.timeout === undefined ? this._timeout : options.timeout) as number,
+							() => {
+								if (options.throwOnTimeout === undefined ? this._throwOnTimeout : options.throwOnTimeout) {
+									this.emit('error', timeoutError);
+									reject(timeoutError);
+								}
+
+								return undefined;
 							}
+						);
 
-							return undefined;
-						}
-					);
+						const result = await operation;
+						resolve(result!);
+						this.emit('completed', result);
+					} catch (error: unknown) {
+						reject(error);
+						this.emit('error', error);
+					}
 
-					const result = await operation;
-					resolve(result!);
-					this.emit('completed', result);
-				} catch (error: unknown) {
-					reject(error);
-					this.emit('error', error);
-				}
+					this._next();
+				};
 
-				this._next();
-			};
-
-			this._queue.enqueue(run, options, resolve);
-			this._tryToStartAnother();
-			this.emit('add');
+				this._queue.enqueue(run, options, resolve);
+				this._tryToStartAnother();
+				this.emit('add');
+			} catch (e2) {
+				reject(e2);
+				this.emit('error', e2);
+			}
 		});
 	}
 
@@ -418,4 +423,4 @@ export default class PQueue<QueueType extends Queue<RunFunction, EnqueueOptionsT
 	}
 }
 
-export {Queue, QueueAddOptions, DefaultAddOptions, Options};
+export { Queue, QueueAddOptions, DefaultAddOptions, Options };
