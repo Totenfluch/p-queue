@@ -245,7 +245,8 @@ export default class PQueue<QueueType extends Queue<RunFunction, EnqueueOptionsT
 						(options.timeout === undefined ? this._timeout : options.timeout) as number,
 						() => {
 							if (options.throwOnTimeout === undefined ? this._throwOnTimeout : options.throwOnTimeout) {
-								reject(timeoutError);
+								this.emit('error', timeoutError);
+								return timeoutError;
 							}
 
 							return undefined;
