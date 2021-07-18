@@ -1,7 +1,9 @@
-# p-queue
+# p-aggregate-queue-aggregate
 
 > Promise queue with concurrency control
-> Same as p-queue but exposes promise: https://github.com/sindresorhus/p-queue/pull/105
+
+> Same as p-aggregate-queue but exposes promise: https://github.com/sindresorhus/p-aggregate-queue/pull/105
+
 > Loads as a normal module..............
 
 Useful for rate-limiting async (or sync) operations. For example, when interacting with a REST API or when doing CPU/memory intensive tasks.
@@ -9,7 +11,7 @@ Useful for rate-limiting async (or sync) operations. For example, when interacti
 ## Install
 
 ```
-$ npm install p-queue
+$ npm install p-aggregate-queue
 ```
 
 ## Usage
@@ -17,7 +19,7 @@ $ npm install p-queue
 Here we run only one promise at the time. For example, set `concurrency` to 4 to run four promises at the same time.
 
 ```js
-const {default: PQueue} = require('p-queue');
+const {default: PQueue} = require('p-aggregate-queue');
 const got = require('got');
 
 const queue = new PQueue({concurrency: 1});
@@ -215,7 +217,7 @@ Emitted as each item is processed in the queue for the purpose of tracking progr
 
 ```js
 const delay = require('delay');
-const {default: PQueue} = require('p-queue');
+const {default: PQueue} = require('p-aggregate-queue');
 
 const queue = new PQueue({concurrency: 2});
 
@@ -237,7 +239,7 @@ Emitted when an item completes without error.
 
 ```js
 import delay from 'delay';
-import PQueue from 'p-queue';
+import PQueue from 'p-aggregate-queue';
 
 const queue = new PQueue({concurrency: 2});
 
@@ -254,7 +256,7 @@ Emitted if an item throws an error.
 
 ```js
 import delay from 'delay';
-import PQueue from 'p-queue';
+import PQueue from 'p-aggregate-queue';
 
 const queue = new PQueue({concurrency: 2});
 
@@ -271,7 +273,7 @@ Emitted every time the queue becomes empty and all promises have completed; `que
 
 ```js
 const delay = require('delay');
-const {default: PQueue} = require('p-queue');
+const {default: PQueue} = require('p-aggregate-queue');
 
 const queue = new PQueue();
 
@@ -302,7 +304,7 @@ Emitted every time a task is completed and the number of pending or queued tasks
 
 ```js
 const delay = require('delay');
-const {default: PQueue} = require('p-queue');
+const {default: PQueue} = require('p-aggregate-queue');
 
 const queue = new PQueue();
 
@@ -332,7 +334,7 @@ A more advanced example to help you understand the flow.
 
 ```js
 const delay = require('delay');
-const {default: PQueue} = require('p-queue');
+const {default: PQueue} = require('p-aggregate-queue');
 
 const queue = new PQueue({concurrency: 1});
 
@@ -428,7 +430,7 @@ const queue = new PQueue({
 });
 ```
 
-`p-queue` will call corresponding methods to put and get operations from this queue.
+`p-aggregate-queue` will call corresponding methods to put and get operations from this queue.
 
 ## FAQ
 
@@ -448,7 +450,7 @@ They are just different constraints. The `concurrency` option limits how many th
 
 <div align="center">
 	<b>
-		<a href="https://tidelift.com/subscription/pkg/npm-p-queue?utm_source=npm-p-queue&utm_medium=referral&utm_campaign=readme">Get professional support for this package with a Tidelift subscription</a>
+		<a href="https://tidelift.com/subscription/pkg/npm-p-aggregate-queue?utm_source=npm-p-aggregate-queue&utm_medium=referral&utm_campaign=readme">Get professional support for this package with a Tidelift subscription</a>
 	</b>
 	<br>
 	<sub>
