@@ -1,6 +1,6 @@
 {
 	"name": "p-aggregate-queue",
-	"version": "8.0.4",
+	"version": "8.0.5",
 	"description": "Promise queue with concurrency control",
 	"license": "MIT",
 	"repository": "sindresorhus/p-queue",
