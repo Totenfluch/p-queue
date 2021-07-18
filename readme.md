@@ -4,7 +4,12 @@
 
 > Same as p-aggregate-queue but exposes promise: https://github.com/sindresorhus/p-aggregate-queue/pull/105
 
-> Loads as a normal module..............
+> Loads as a normal module
+
+> Fixes the promise rejection handling bug.
+
+
+
 
 Useful for rate-limiting async (or sync) operations. For example, when interacting with a REST API or when doing CPU/memory intensive tasks.
 
